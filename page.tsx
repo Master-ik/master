@@ -8,18 +8,20 @@ export default function Home() {
   const [diagnosis, setDiagnosis] = useState('')
   const [stream, setStream] = useState<MediaStream | null>(null)
 
-  // 撮影開始時にカメラを起動
   const handleStartCamera = async () => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { exact: 'environment' } }, // 背面カメラを指定
-    })
-    if (videoRef.current) {
-      videoRef.current.srcObject = mediaStream
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } }, // ← fallback付きで確実性UP
+      })
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream
+      }
+      setStream(mediaStream)
+    } catch (err) {
+      console.error('カメラ起動エラー:', err)
     }
-    setStream(mediaStream)
   }
 
-  // 撮影＆診断 → カメラ停止
   const handleTakePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return
 
@@ -34,9 +36,10 @@ export default function Home() {
     const result = getDiagnosis(brightness)
     setDiagnosis(result)
 
-    // カメラを停止
+    // カメラ停止処理
     if (stream) {
       stream.getTracks().forEach((track) => track.stop())
+      setStream(null)
     }
   }
 
@@ -59,7 +62,13 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4">
       <div className="relative w-full max-w-md">
-        <video ref={videoRef} autoPlay playsInline className="w-full rounded-lg shadow-lg" />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="w-full rounded-lg shadow-lg"
+          muted
+        />
         <img
           src="/hand-guide.png"
           alt="手のガイド"
