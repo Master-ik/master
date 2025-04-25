@@ -69,8 +69,9 @@ export default function Home() {
           className="w-full rounded-lg shadow-lg"
           muted
         />
+        
         <img
-          src="hand-guide.png"
+          src="/hand-guide.png"
           alt="手のガイド"
           className="absolute top-0 left-0 w-full opacity-40 pointer-events-none"
         />
