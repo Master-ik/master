@@ -8,10 +8,11 @@ export default function Home() {
   const [diagnosis, setDiagnosis] = useState('')
   const [stream, setStream] = useState<MediaStream | null>(null)
 
+  // カメラを起動する関数
   const handleStartCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } }, // ← fallback付きで確実性UP
+        video: { facingMode: { ideal: 'environment' } }, // 背面カメラ推奨
       })
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
@@ -22,6 +23,7 @@ export default function Home() {
     }
   }
 
+  // 撮影 → 明るさ診断 → カメラ停止
   const handleTakePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return
 
@@ -36,13 +38,14 @@ export default function Home() {
     const result = getDiagnosis(brightness)
     setDiagnosis(result)
 
-    // カメラ停止処理
+    // カメラ停止
     if (stream) {
       stream.getTracks().forEach((track) => track.stop())
       setStream(null)
     }
   }
 
+  // 明るさの平均を計算する関数
   const getAverageBrightness = (imageData: ImageData): number => {
     const data = imageData.data
     let total = 0
@@ -53,6 +56,7 @@ export default function Home() {
     return total / (data.length / 4)
   }
 
+  // 仮の診断ロジック
   const getDiagnosis = (brightness: number): string => {
     return brightness > 150
       ? 'あなたは明るく前向きな性格です。'
@@ -60,7 +64,8 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4">
+    <main className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4 bg-gray-100">
+      {/* カメラとガイド画像を重ねる */}
       <div className="relative w-full max-w-md">
         <video
           ref={videoRef}
@@ -69,7 +74,6 @@ export default function Home() {
           className="w-full rounded-lg shadow-lg"
           muted
         />
-        
         <img
           src="/hand-guide.png"
           alt="手のガイド"
@@ -77,8 +81,13 @@ export default function Home() {
         />
       </div>
 
-      <canvas ref={canvasRef} className="hidden" />
+      {/* 撮影画像の表示（診断後に出現） */}
+      <canvas
+        ref={canvasRef}
+        className={`rounded shadow ${diagnosis ? 'block' : 'hidden'}`}
+      />
 
+      {/* 操作ボタン */}
       <button
         onClick={handleStartCamera}
         className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
@@ -93,6 +102,7 @@ export default function Home() {
         撮影する
       </button>
 
+      {/* 診断結果の表示 */}
       {diagnosis && (
         <div className="bg-white text-gray-800 p-4 rounded shadow max-w-md text-center">
           <h2 className="text-lg font-bold mb-2">診断結果</h2>
