@@ -80,3 +80,13 @@ export default function Home() {
     </main>
   )
 }
+
+<div className="relative w-full max-w-md">
+  <video ref={videoRef} autoPlay className="rounded-lg shadow-lg w-full" />
+  <img
+    src="/hand-guide.png"
+    alt="手のガイド"
+    className="absolute top-0 left-0 w-full opacity-40 pointer-events-none"
+  />
+</div>
+
